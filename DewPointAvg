@@ -1,0 +1,42 @@
+from google.colab import files
+uploaded = files.upload()
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import io
+
+df = pd.read_csv(io.StringIO(uploaded['austin_weather.csv'].decode('utf-8')))
+df.head()
+
+df.info()
+
+df['HumidityAvgPercent'].replace('-', np.nan, inplace=True)
+df['DewPointAvgF'].replace('-', np.nan, inplace=True)
+df['WindAvgMPH'].replace('-', np.nan, inplace=True)
+
+df['HumidityAvgPercent'].fillna(method='ffill',inplace=True)
+df['DewPointAvgF'].fillna(method='ffill',inplace=True)
+df['WindAvgMPH'].fillna(method='ffill',inplace=True)
+
+x = df['HumidityAvgPercent'].astype(float)
+y = df['DewPointAvgF'].astype(float)
+area = df['WindAvgMPH'].astype(float).multiply(other=20)
+
+fig, ax = plt.subplots(figsize=(15,8))
+sc = ax.scatter(x, y, c = df['TempAvgF'], cmap='coolwarm', s=area, alpha=0.8)
+plt.colorbar(sc)
+ax.set_xlabel('Humidity Avg %')
+ax.set_ylabel('Dew Point Avg (F)')
+ax.set_title('Austhin Weather')
+
+"""
+Suatu tempat jarang mengalami kondisi titik saturasi yang rendah, 
+dibuktikan dengan sedikitnya point/titik yang ada di rage nilai saturasi antara 0-40.
+
+Sebaliknya, daerah tersebut lebih banyak mengalami kondisi dimana nilai titik saturasi besar. 
+Ditandai dengan banyaknya scatter di range nilai titik saturasi 40-70. 
+Tempat tersebut juga cenderung memiliki temperatur yang tinggi dengan 
+nilai kelembaban udara berada pada range 50-70%
+
+"""
